@@ -56,7 +56,6 @@ public class UserController : ControllerBase
             //Validate password
             if (!BCrypt.Net.BCrypt.Verify(userAuth.Password, dbUser!.UserAuth!.Password))
             {
-                _logger.LogError("Invalid password for user {UserUsername}", userAuth.Username);
                 throw new Exception("Invalid password!");
             }
             //Generate JWT token

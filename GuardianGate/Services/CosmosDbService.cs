@@ -29,7 +29,6 @@ public class CosmosDbService : ICosmosDbService
         
         if (userQueryList.Any())
         {
-            _logger.LogError("User {UserUsername} already exists", user.Username);
             throw new Exception("User already exists!");
         }
         
@@ -38,7 +37,6 @@ public class CosmosDbService : ICosmosDbService
         
         //Create user
         await _users.CreateItemAsync(user);
-        _logger.LogInformation("Created user {UserUsername}", user.Username);
         return true;
     }
     
@@ -51,10 +49,8 @@ public class CosmosDbService : ICosmosDbService
         
         if (!userQueryList.Any())
         {
-            _logger.LogError("User {UserUsername} does not exist", userAuth.Username);
             throw new Exception("User does not exist!");
         }
-        _logger.LogInformation("Getting user {UserUsername}", userAuth.Username);
         
 
         var userQuery = userQueryList.FirstOrDefault();
@@ -65,7 +61,6 @@ public class CosmosDbService : ICosmosDbService
     
     public async Task<UserModel> UpdateUser(UserModel user)
     {
-        _logger.LogInformation("Updating user {UserUsername}", user.Username);
         var userQueryList = _users.GetItemLinqQueryable<UserModel>(true).Where(u => u.Username == user.Username).ToList();
         if (userQueryList.Any())
         {
@@ -84,26 +79,21 @@ public class CosmosDbService : ICosmosDbService
             var id = userQueryList.FirstOrDefault()?.Id;
             user.Id = id;
             await _users.ReplaceItemAsync(user, id);
-            _logger.LogInformation("Updated user {UserUsername}", user.Username);
             return user;
         }
-        _logger.LogError("User {UserUsername} does not exist", user.Username);
         throw new Exception("User does not exist!");
     }
     
     public async Task<bool> DeleteUser(string username)
     {
-        _logger.LogInformation("Deleting user {UserUsername}", username);
         var userQueryList = _users.GetItemLinqQueryable<UserModel>(true).Where(u => u.Username == username).ToList();
         
         if (userQueryList.Any())
         {
             var id = userQueryList.FirstOrDefault()?.Id;
             await _users.DeleteItemAsync<UserModel>(id, new PartitionKey(id));
-            _logger.LogInformation("Deleted user {UserUsername}", username);
             return true;
         }
-        _logger.LogError("User {UserUsername} does not exist", username);
         throw new Exception("User does not exist!");
     }
     
